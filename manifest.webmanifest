@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Top Açaí Delivery",
+  "short_name": "Top Açaí",
+  "description": "Peça seu açaí favorito na Top Açaí Delivery.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0710",
+  "theme_color": "#0b0710",
+  "icons": [
+    { "src": "top-acai-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

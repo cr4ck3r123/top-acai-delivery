@@ -1,0 +1,788 @@
+{
+  "info": {
+    "_postman_id": "d616888b-e299-45e5-9199-0fc27605d94e",
+    "name": "Web Pedidos - API",
+    "description": "Rotas públicas, pedidos, acompanhamento, painel administrativo e webhook SyncPay. Defina baseUrl antes de usar. Para operações do painel, execute primeiro 'Obter sessão e CSRF' e depois 'Login administrativo'. Nenhuma credencial é armazenada nesta coleção.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost/web-pedidos",
+      "type": "string",
+      "description": "URL base da instalação. Para receber callbacks pelo ngrok, use o domínio público com o caminho da aplicação, se houver."
+    },
+    {
+      "key": "tracking_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "csrf_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_username",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "webhook_secret",
+      "value": "",
+      "type": "string",
+      "description": "Segredo de assinatura HMAC configurado/fornecido para o webhook SyncPay. NÃO é a URL do webhook nem o Client Secret. Preencha apenas para testar a assinatura no Postman."
+    },
+    {
+      "key": "syncpay_reference_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payment_amount",
+      "value": "38.90",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Loja e pedidos",
+      "item": [
+        {
+          "name": "Consultar cardápio e estado dos pagamentos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu.php"
+              ]
+            },
+            "description": "Retorna loja, categorias, produtos disponíveis e se Pix online está habilitado. Cartão online permanece desabilitado."
+          }
+        },
+        {
+          "name": "Criar pedido - pagar na entrega (dinheiro)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"Cliente Exemplo\",\n  \"customer_phone\": \"45999990000\",\n  \"fulfillment\": \"delivery\",\n  \"address\": \"Rua das Flores, 123\",\n  \"complement\": \"Casa\",\n  \"neighborhood\": \"Centro\",\n  \"payment_method\": \"cash\",\n  \"cash_change\": \"50.00\",\n  \"notes\": \"Entregar na portaria\",\n  \"items\": [\n    {\n      \"id\": {{product_id}},\n      \"quantity\": 1,\n      \"notes\": \"Sem cebola\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders.php"
+              ]
+            },
+            "description": "Cria pedido e calcula preços no servidor. Use IDs de produtos existentes no cardápio. Para retirada use fulfillment=pickup e omita endereço/bairro. payment_method também aceita pix, credit_card e debit_card (pagamento presencial). Resposta 201 inclui tracking_token e whatsapp_url."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const result = pm.response.json();",
+                  "  if (result.tracking_token) pm.collectionVariables.set('tracking_token', result.tracking_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar pedido - retirada (cartão presencial)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"Cliente Exemplo\",\n  \"customer_phone\": \"45999990000\",\n  \"fulfillment\": \"pickup\",\n  \"payment_method\": \"credit_card\",\n  \"items\": [\n    {\n      \"id\": {{product_id}},\n      \"quantity\": 1,\n      \"notes\": \"\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders.php"
+              ]
+            },
+            "description": "Exemplo de retirada. Métodos presenciais aceitos: pix, credit_card, debit_card e cash."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const result = pm.response.json();",
+                  "  if (result.tracking_token) pm.collectionVariables.set('tracking_token', result.tracking_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar pedido - Pix online",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"Cliente Exemplo\",\n  \"customer_phone\": \"45999990000\",\n  \"customer_email\": \"cliente@example.com\",\n  \"customer_cpf\": \"52998224725\",\n  \"fulfillment\": \"delivery\",\n  \"address\": \"Rua das Flores, 123\",\n  \"complement\": \"\",\n  \"neighborhood\": \"Centro\",\n  \"payment_method\": \"pix_online\",\n  \"notes\": \"\",\n  \"items\": [\n    {\n      \"id\": {{product_id}},\n      \"quantity\": 1,\n      \"notes\": \"\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders.php"
+              ]
+            },
+            "description": "A cobrança é real no ambiente SyncPay configurado. Verifique o modo da conta antes de enviar. Requer pagamento online habilitado, e-mail e CPF válidos; não use para teste casual. Resposta 201 traz pix_code e tracking_token. Cartão online está pausado e retorna 503."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const result = pm.response.json();",
+                  "  if (result.tracking_token) pm.collectionVariables.set('tracking_token', result.tracking_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Acompanhar pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{tracking_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/track-order.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "track-order.php"
+              ]
+            },
+            "description": "Consulta apenas os dados permitidos para o token privado retornado na criação do pedido."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Painel administrativo",
+      "description": "Execute primeiro 'Obter sessão e CSRF'; o cookie de sessão é mantido pelo Postman. Login e demais POSTs exigem X-CSRF-Token.",
+      "item": [
+        {
+          "name": "Obter sessão e CSRF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                ""
+              ]
+            },
+            "description": "Inicia a sessão administrativa e captura o token CSRF da página HTML. Deve ser executada antes do login."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const match = pm.response.text().match(/<meta name=\"csrf-token\" content=\"([a-f0-9]{64})\">/i);",
+                  "if (match) {",
+                  "  pm.collectionVariables.set('csrf_token', match[1]);",
+                  "} else {",
+                  "  throw new Error('Não foi possível obter o CSRF. Confira baseUrl e a resposta da página /admin/.');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login administrativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"login\",\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Preencha admin_username e admin_password nas variáveis locais do Postman. Resposta de sucesso atualiza csrf_token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json();",
+                  "  if (result.csrf_token) pm.collectionVariables.set('csrf_token', result.csrf_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar painel (produtos, pedidos, loja e admins)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Requer sessão autenticada. Retorna até 100 pedidos, produtos, configurações e contas administrativas."
+          }
+        },
+        {
+          "name": "Cadastrar produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"save_product\",\n  \"name\": \"Produto Exemplo\",\n  \"description\": \"Descrição do produto\",\n  \"category\": \"Hambúrgueres\",\n  \"price\": \"29.90\",\n  \"image_url\": \"https://example.com/produto.jpg\",\n  \"featured\": false,\n  \"available\": true,\n  \"sort_order\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Omitir id cria; incluir id atualiza um produto existente."
+          }
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"save_product\",\n  \"id\": {{product_id}},\n  \"name\": \"Produto Exemplo\",\n  \"description\": \"Descrição atualizada\",\n  \"category\": \"Hambúrgueres\",\n  \"price\": \"31.90\",\n  \"image_url\": \"https://example.com/produto.jpg\",\n  \"featured\": true,\n  \"available\": true,\n  \"sort_order\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ativar ou ocultar produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"toggle_product\",\n  \"id\": {{product_id}},\n  \"available\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Excluir produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"delete_product\",\n  \"id\": {{product_id}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Operação destrutiva. Pedidos antigos são preservados."
+          }
+        },
+        {
+          "name": "Atualizar configurações da loja",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"save_settings\",\n  \"name\": \"Top Açai Delivery\",\n  \"whatsapp_phone\": \"5545988392692\",\n  \"delivery_fee\": \"6.00\",\n  \"free_delivery_minimum\": \"80.00\",\n  \"estimated_delivery_minutes\": 30,\n  \"is_open\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Para não definir valor mínimo de entrega grátis, use free_delivery_minimum como string vazia."
+          }
+        },
+        {
+          "name": "Atualizar status do pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"update_order_status\",\n  \"id\": {{order_id}},\n  \"status\": \"confirmed\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Transições válidas: pending→confirmed/cancelled; confirmed→preparing/cancelled; preparing→ready/cancelled; ready→delivered/cancelled. Pedido online só pode ser confirmado após aprovação do pagamento."
+          }
+        },
+        {
+          "name": "Criar conta administrativa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"create_admin\",\n  \"username\": \"novo.admin\",\n  \"password\": \"TroqueEstaSenha123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Requer sessão administrativa. A senha deve ter pelo menos 12 caracteres; troque o exemplo antes de enviar."
+          }
+        },
+        {
+          "name": "Ativar ou desativar conta administrativa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"toggle_admin\",\n  \"id\": 2,\n  \"active\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Não é possível desativar a própria conta nem a última conta administrativa ativa."
+          }
+        },
+        {
+          "name": "Alterar senha administrativa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"change_password\",\n  \"current_password\": \"SenhaAtual123!\",\n  \"new_password\": \"NovaSenhaSegura456!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Após alterar a senha, faça login novamente se a sessão for invalidada."
+          }
+        },
+        {
+          "name": "Logout administrativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"logout\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin.php"
+              ]
+            },
+            "description": "Encerra a sessão administrativa."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json();",
+                  "  if (result.csrf_token) pm.collectionVariables.set('csrf_token', result.csrf_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Integração SyncPay",
+      "item": [
+        {
+          "name": "Webhook - transaction.updated",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-SyncPay-Signature",
+                "value": "{{syncpay_signature}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"transaction.updated\",\n  \"event_id\": \"123e4567-e89b-42d3-a456-426614174000\",\n  \"transaction\": {\n    \"reference_id\": \"{{syncpay_reference_id}}\",\n    \"status\": \"completed\",\n    \"payment_method\": \"pix\",\n    \"amount\": {{payment_amount}},\n    \"currency\": \"BRL\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/syncpay-webhook.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "syncpay-webhook.php"
+              ]
+            },
+            "description": "URL de callback deste sistema: {{baseUrl}}/api/syncpay-webhook.php (não /webhooks/syncpay). A assinatura precisa corresponder exatamente ao corpo enviado: HMAC-SHA256(secret, timestamp + '.' + rawBody), no formato t=<unix>,v1=<hex>. webhook_secret é o segredo HMAC, não a URL. Esta chamada assinada manualmente serve para teste; o callback real é enviado pela SyncPay."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const secret = pm.collectionVariables.get('webhook_secret');",
+                  "if (!secret) throw new Error('Defina webhook_secret localmente; não compartilhe nem exporte esse valor.');",
+                  "const timestamp = Math.floor(Date.now() / 1000).toString();",
+                  "const rawBody = pm.variables.replaceIn(pm.request.body.raw);",
+                  "const signature = CryptoJS.HmacSHA256(timestamp + '.' + rawBody, secret).toString(CryptoJS.enc.Hex);",
+                  "pm.variables.set('syncpay_signature', 't=' + timestamp + ',v1=' + signature);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

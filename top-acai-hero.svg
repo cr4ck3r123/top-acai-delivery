@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" fill="none">
+  <defs>
+    <linearGradient id="bowl" x1="360" y1="260" x2="550" y2="510" gradientUnits="userSpaceOnUse"><stop stop-color="#9220B8"/><stop offset=".55" stop-color="#5C0E79"/><stop offset="1" stop-color="#270736"/></linearGradient>
+    <linearGradient id="berry" x1="260" y1="130" x2="300" y2="210" gradientUnits="userSpaceOnUse"><stop stop-color="#D938FF"/><stop offset="1" stop-color="#7208A5"/></linearGradient>
+    <linearGradient id="cream" x1="440" y1="235" x2="550" y2="330" gradientUnits="userSpaceOnUse"><stop stop-color="#F9D6F5"/><stop offset="1" stop-color="#E9B2EB"/></linearGradient>
+    <filter id="shadow" x="190" y="85" width="610" height="440" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+  <ellipse cx="515" cy="425" rx="235" ry="43" fill="#000" opacity=".42" filter="url(#shadow)"/>
+  <!-- creamy acai bowl -->
+  <path d="M294 240h430l-46 203c-8 37-42 63-80 63H420c-39 0-73-26-81-64l-45-202Z" fill="url(#bowl)" stroke="#D44CF0" stroke-width="5"/>
+  <path d="M329 335c110 38 258 38 360 0l-12 56c-103 39-224 41-337 0l-11-56Z" fill="#A02CC4" opacity=".54"/>
+  <path d="M358 435c90 27 202 27 302-1" stroke="#E86CFF" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+  <!-- bowl rim and acai -->
+  <ellipse cx="509" cy="245" rx="225" ry="87" fill="#F3D3ED" stroke="#F8E8F6" stroke-width="9"/>
+  <ellipse cx="509" cy="237" rx="204" ry="71" fill="#42104F"/>
+  <ellipse cx="505" cy="230" rx="191" ry="62" fill="#6C1685"/>
+  <path d="M348 237c37-43 88-47 124-28 23-40 69-52 108-24 40-20 80-10 109 23-38 37-91 57-171 57-69 0-127-9-170-28Z" fill="#8420A0"/>
+  <!-- banana slices -->
+  <g fill="#FFE69A" stroke="#FFF4C9" stroke-width="5">
+    <ellipse cx="390" cy="214" rx="39" ry="25" transform="rotate(-22 390 214)"/><ellipse cx="470" cy="190" rx="39" ry="25" transform="rotate(15 470 190)"/><ellipse cx="558" cy="210" rx="39" ry="25" transform="rotate(-8 558 210)"/><ellipse cx="625" cy="226" rx="38" ry="24" transform="rotate(20 625 226)"/>
+  </g>
+  <g fill="#D5A64D"><circle cx="390" cy="214" r="7"/><circle cx="470" cy="190" r="7"/><circle cx="558" cy="210" r="7"/><circle cx="625" cy="226" r="7"/></g>
+  <!-- strawberries -->
+  <path d="M427 151c-30-29-72-1-55 31 9 18 30 36 46 43 16-16 33-39 37-57 6-26-12-39-28-17Z" fill="#FF3D67" stroke="#FF8CA3" stroke-width="4"/>
+  <path d="M575 145c-27-31-71-7-58 27 7 19 26 39 41 48 17-14 37-34 43-52 9-25-8-40-26-23Z" fill="#F82F62" stroke="#FF8CA3" stroke-width="4"/>
+  <g fill="#FFE7A6"><ellipse cx="395" cy="184" rx="2.5" ry="4"/><ellipse cx="411" cy="202" rx="2.5" ry="4"/><ellipse cx="432" cy="178" rx="2.5" ry="4"/><ellipse cx="542" cy="179" rx="2.5" ry="4"/><ellipse cx="559" cy="199" rx="2.5" ry="4"/><ellipse cx="581" cy="171" rx="2.5" ry="4"/></g>
+  <!-- blueberries and granola -->
+  <g fill="url(#berry)" stroke="#D27AEC" stroke-width="3"><circle cx="338" cy="220" r="21"/><circle cx="369" cy="178" r="17"/><circle cx="512" cy="163" r="19"/><circle cx="603" cy="184" r="18"/><circle cx="668" cy="218" r="21"/><circle cx="450" cy="225" r="15"/></g>
+  <g fill="#F4C56A"><circle cx="353" cy="197" r="5"/><circle cx="371" cy="234" r="6"/><circle cx="428" cy="174" r="5"/><circle cx="492" cy="211" r="6"/><circle cx="536" cy="181" r="5"/><circle cx="591" cy="224" r="6"/><circle cx="647" cy="195" r="5"/><circle cx="632" cy="241" r="5"/></g>
+  <!-- a few fresh leaves -->
+  <path d="M305 175c-3-28 13-46 39-52 0 25-12 43-39 52ZM678 154c14-26 36-32 58-24-11 22-29 31-58 24Z" fill="#55C76F" stroke="#91EB8E" stroke-width="4" stroke-linejoin="round"/>
+  <path d="m306 175 25-34m348 13 38-17" stroke="#B7FF99" stroke-width="3" stroke-linecap="round"/>
+</svg>
